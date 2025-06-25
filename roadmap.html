@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadmap - DevTools Box</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #1e1e1e;
+            --sidebar-bg: #252526;
+            --text-color: #cccccc;
+            --text-secondary: #969696;
+            --accent-color: #007acc;
+            --hover-color: #2d2d30;
+            --border-color: #3c3c3c;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #ffffff;
+            --sidebar-bg: #f3f3f3;
+            --text-color: #333333;
+            --text-secondary: #666666;
+            --hover-color: #e8e8e8;
+            --border-color: #d0d0d0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle, .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-toggle:hover, .menu-toggle:hover {
+            background-color: var(--hover-color);
+        }
+
+        .menu-toggle {
+            display: none;
+        }
+
+        /* Navigation */
+        .navigation {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 999;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 10px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .nav-item.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 40px;
+            min-height: calc(100vh - 60px);
+        }
+
+        .roadmap-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .roadmap-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .roadmap-header h2 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        .roadmap-header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Version Cards */
+        .version-card {
+            background-color: var(--sidebar-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .version-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 122, 204, 0.1);
+        }
+
+        .version-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .version-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .version-current {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .version-planned {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .version-future {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .version-vision {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+        }
+
+        .version-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .version-content {
+            padding: 25px;
+        }
+
+        .features-list {
+            list-style: none;
+            display: grid;
+            gap: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background-color: var(--hover-color);
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background-color: var(--border-color);
+        }
+
+        .feature-emoji {
+            font-size: 1.2rem;
+            width: 25px;
+            text-align: center;
+        }
+
+        .feature-text {
+            flex: 1;
+        }
+
+        .feature-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            background-color: #005a9e;
+            transform: translateY(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .navigation {
+                transform: translateX(-100%);
+            }
+
+            .navigation.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .roadmap-header h2 {
+                font-size: 2rem;
+            }
+
+            .version-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        /* Timeline connector */
+        .version-card:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -15px;
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(to bottom, var(--accent-color), transparent);
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .roadmap-container {
+            position: relative;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <!-- Header -->
+    <header class="header">
+        <h1><i class="fas fa-route"></i> DevTools Box - Roadmap</h1>
+        <div class="header-controls">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Changer le thème">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="menu-toggle" onclick="toggleMenu()" title="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navigation" id="navigation">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i> Accueil
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="fas fa-route"></i> Roadmap
+        </a>
+        <button class="nav-item" onclick="scrollToVersion('v1-0')">
+            <i class="fas fa-flag"></i> Version actuelle
+        </button>
+        <button class="nav-item" onclick="scrollToVersion('v1-1')">
+            <i class="fas fa-clock"></i> Prochaines versions
+        </button>
+        <button class="nav-item" onclick="scrollToVersion('v2-0')">
+            <i class="fas fa-rocket"></i> Migration React
+        </button>
+        <button class="nav-item" onclick="scrollToVersion('v3-0')">
+            <i class="fas fa-eye"></i> Vision long terme
+        </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="roadmap-container">
+            <div class="roadmap-header">
+                <h2>Feuille de Route</h2>
+                <p>Évolution planifiée de la boîte à outils développeur, de la version actuelle vers une plateforme complète et interactive.</p>
+            </div>
+
+            <!-- Version 1.0 -->
+            <div class="version-card" id="v1-0">
+                <div class="version-header">
+                    <span class="version-badge version-current">ACTUEL</span>
+                    <h3 class="version-title">v1.0 - Version initiale</h3>
+                </div>
+                <div class="version-content">
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <span class="feature-emoji">🎨</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Interface VS Code-like</div>
+                                <div class="feature-description">Design inspiré de l'éditeur préféré des développeurs</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">🃏</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Cards statiques des outils</div>
+                                <div class="feature-description">Présentation claire des outils de développement</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">🌙</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Mode sombre</div>
+                                <div class="feature-description">Thème sombre pour le confort visuel</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">📱</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Responsive design</div>
+                                <div class="feature-description">Adaptation parfaite sur tous les écrans</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 1.1 -->
+            <div class="version-card" id="v1-1">
+                <div class="version-header">
+                    <span class="version-badge version-planned">PLANIFIÉ</span>
+                    <h3 class="version-title">v1.1 - Améliorations UX</h3>
+                </div>
+                <div class="version-content">
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <span class="feature-emoji">🌐</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Localisation (FR/EN)</div>
+                                <div class="feature-description">Support multilingue pour une audience internationale</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">🔍</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Barre de recherche basique</div>
+                                <div class="feature-description">Recherche rapide dans les outils disponibles</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">📱</span>
+                            <div class="feature-text">
+                                <div class="feature-name">PWA (installable)</div>
+                                <div class="feature-description">Application installable sur mobile et desktop</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 1.2 -->
+            <div class="version-card" id="v1-2">
+                <div class="version-header">
+                    <span class="version-badge version-planned">PLANIFIÉ</span>
+                    <h3 class="version-title">v1.2 - Interactivité</h3>
+                </div>
+                <div class="version-content">
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <span class="feature-emoji">🎯</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Modales avec infos outils</div>
+                                <div class="feature-description">Pop-ups détaillées avec commandes d'installation</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">🏷️</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Système de tags/filtres</div>
+                                <div class="feature-description">Filtrage par catégorie, framework, difficulté</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">⭐</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Favoris (localStorage)</div>
+                                <div class="feature-description">Sauvegarde des outils préférés localement</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 2.0 -->
+            <div class="version-card" id="v2-0">
+                <div class="version-header">
+                    <span class="version-badge version-future">MIGRATION</span>
+                    <h3 class="version-title">v2.0 - Architecture React</h3>
+                </div>
+                <div class="version-content">
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <span class="feature-emoji">🚀</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Architecture composants</div>
+                                <div class="feature-description">Refactorisation complète en React pour plus de maintenabilité</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">📦</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Base de données outils (JSON)</div>
+                                <div class="feature-description">Structure de données centralisée et extensible</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">🔧</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Snippets de code</div>
+                                <div class="feature-description">Exemples d'utilisation copiables en un clic</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">📊</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Analytics usage</div>
+                                <div class="feature-description">Statistiques d'utilisation pour améliorer l'expérience</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 2.1+ -->
+            <div class="version-card" id="v2-1">
+                <div class="version-header">
+                    <span class="version-badge version-future">FUTUR</span>
+                    <h3 class="version-title">v2.1+ - Fonctionnalités avancées</h3>
+                </div>
+                <div class="version-content">
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <span class="feature-emoji">👤</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Comptes utilisateurs</div>
+                                <div class="feature-description">Profils personnalisés et préférences sauvegardées</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">📝</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Contributions communautaires</div>
+                                <div class="feature-description">Permettre à la communauté d'ajouter des outils</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">🔄</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Sync favoris cross-device</div>
+                                <div class="feature-description">Synchronisation des préférences entre appareils</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">📈</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Trending tools</div>
+                                <div class="feature-description">Outils populaires et tendances du moment</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Version 3.0 -->
+            <div class="version-card" id="v3-0">
+                <div class="version-header">
+                    <span class="version-badge version-vision">VISION</span>
+                    <h3 class="version-title">v3.0 - Plateforme complète</h3>
+                </div>
+                <div class="version-content">
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <span class="feature-emoji">🤖</span>
+                            <div class="feature-text">
+                                <div class="feature-name">IA pour recommandations</div>
+                                <div class="feature-description">Suggestions intelligentes basées sur le profil développeur</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">🛠️</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Playground intégré</div>
+                                <div class="feature-description">Environnement de test directement dans l'interface</div>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-emoji">📚</span>
+                            <div class="feature-text">
+                                <div class="feature-name">Tutoriels interactifs</div>
+                                <div class="feature-description">Apprentissage guidé pour chaque outil</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.querySelector('.theme-toggle i');
+            const currentTheme = body.getAttribute('data-theme');
+            
+            if (currentTheme === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const body = document.body;
+            const themeIcon = document.querySelector('.theme-toggle i');
+            
+            body.setAttribute('data-theme', savedTheme);
+            themeIcon.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Menu Toggle
+        function toggleMenu() {
+            const navigation = document.getElementById('navigation');
+            navigation.classList.toggle('open');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const navigation = document.getElementById('navigation');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            if (!navigation.contains(event.target) && !menuToggle.contains(event.target)) {
+                navigation.classList.remove('open');
+            }
+        });
+
+        // Scroll to version
+        function scrollToVersion(versionId) {
+            const element = document.getElementById(versionId);
+            if (element) {
+                element.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+            
+            // Close menu on mobile
+            if (window.innerWidth <= 768) {
+                document.getElementById('navigation').classList.remove('open');
+            }
+        }
+
+        // Back to Top Button
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Show/Hide Back to Top Button
+        window.addEventListener('scroll', function() {
+            const backToTopButton = document.getElementById('backToTop');
+            
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
+        });
+
+        // Active navigation item based on scroll
+        window.addEventListener('scroll', function() {
+            const sections = ['v1-0', 'v1-1', 'v1-2', 'v2-0', 'v3-0'];
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            let currentSection = '';
+            
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= 100 && rect.bottom >= 100) {
+                        currentSection = sectionId;
+                    }
+                }
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTheme();
+        });
+    </script>
+</body>
+</html>
