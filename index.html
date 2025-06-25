@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trousse à outils du dev</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-color: #1e1e1e;
+      --text-color: #cccccc;
+      --card-bg: #2d2d30;
+      --header-bg: #252526;
+      --header-text: #cccccc;
+      --border-color: #3e3e42;
+      --hover-bg: #094771;
+      --hover-shadow: rgba(14, 99, 156, 0.2);
+      --accent-blue: #0078d4;
+      --accent-orange: #ff8c00;
+      --sidebar-bg: #333333;
+      --activity-bar: #2c2c2c;
+      --selection-bg: #264f78;
+      --input-bg: #3c3c3c;
+      --button-bg: #0e639c;
+      --warning-color: #ffcc02;
+      --error-color: #f14c4c;
+      --success-color: #89d185;
+    }
+
+    body[data-theme="light"] {
+      --bg-color: #ffffff;
+      --text-color: #383a42;
+      --card-bg: #f8f8f8;
+      --header-bg: #f3f3f3;
+      --header-text: #383a42;
+      --border-color: #e5e5e5;
+      --hover-bg: #e8f4fd;
+      --hover-shadow: rgba(0, 120, 212, 0.1);
+      --accent-blue: #0078d4;
+      --accent-orange: #ca5010;
+      --sidebar-bg: #f8f8f8;
+      --activity-bar: #f3f3f3;
+      --selection-bg: #add6ff;
+      --input-bg: #ffffff;
+      --button-bg: #0078d4;
+      --warning-color: #bf8803;
+      --error-color: #a1260d;
+      --success-color: #107c10;
+    }
+
+    /* Menu Burger */
+    .burger-menu {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1001;
+      background: var(--activity-bar);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .burger-menu:hover {
+      background: var(--hover-bg);
+      border-color: var(--accent-blue);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .burger-icon {
+      width: 16px;
+      height: 12px;
+      position: relative;
+    }
+
+    .burger-icon span {
+      display: block;
+      position: absolute;
+      height: 1px;
+      width: 100%;
+      background: var(--text-color);
+      transition: all 0.2s ease;
+    }
+
+    .burger-icon span:nth-child(1) { top: 0; }
+    .burger-icon span:nth-child(2) { top: 5px; }
+    .burger-icon span:nth-child(3) { top: 10px; }
+
+    /* Bouton Back to Top */
+    .back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+      background: var(--button-bg);
+      border: 1px solid var(--accent-blue);
+      border-radius: 3px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      font-size: 16px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .back-to-top:hover {
+      background: #1177bb;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .back-to-top:active {
+      background: #005a9e;
+      transform: scale(0.98) translateY(0);
+    }
+
+    /* Menu latéral */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 300px;
+      height: 100vh;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border-color);
+      z-index: 999;
+      transition: left 0.3s ease;
+      overflow-y: auto;
+      font-size: 13px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .side-menu.open {
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 998;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .menu-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Navigation dans le menu */
+    .menu-nav {
+      list-style: none;
+      padding: 40px 0 0 0;
+      margin: 0;
+    }
+
+    .menu-nav li {
+      margin: 0;
+    }
+
+    .menu-nav a {
+      display: flex;
+      align-items: center;
+      padding: 6px 16px;
+      color: var(--text-color);
+      text-decoration: none;
+      transition: background-color 0.1s ease;
+      font-weight: 400;
+      border-left: 3px solid transparent;
+    }
+
+    .menu-nav a:hover {
+      background: var(--hover-bg);
+      border-left-color: var(--accent-blue);
+    }
+
+    .menu-nav .submenu {
+      padding-left: 20px;
+      list-style: none;
+    }
+
+    .menu-nav .submenu a {
+      font-size: 12px;
+      opacity: 0.9;
+      padding: 4px 16px;
+    }
+
+    .menu-footer {
+      margin-top: auto;
+      padding: 12px 20px 16px;
+      border-top: 1px solid var(--border-color);
+      opacity: 0.6;
+    }
+
+    .footer-line {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: center;
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Assurer que le side-menu utilise toute la hauteur */
+    .side-menu {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Sections collapsibles */
+    .section {
+      margin-bottom: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+      position: static;
+      z-index: auto;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 12px 16px;
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.1s ease;
+      position: static;
+    }
+
+    .section-header:hover {
+      background: var(--hover-bg);
+    }
+
+    .section-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 3px;
+      transition: all 0.2s ease;
+      background: transparent;
+    }
+
+    .section-toggle:hover {
+      background: var(--hover-bg);
+    }
+
+    .chevron {
+      width: 16px;
+      height: 16px;
+      fill: var(--text-color);
+      transition: transform 0.2s ease;
+    }
+
+    /* Rotation quand la section est fermée */
+    .section.collapsed .chevron {
+      transform: rotate(180deg);
+    }
+
+    .section-content {
+      padding: 16px;
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+
+    .section.collapsed .section-content {
+      display: none;
+    }
+
+    /* Subsections */
+    .subsection {
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+    }
+
+    .subsection-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 8px 12px;
+      background: var(--input-bg);
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.1s ease;
+    }
+
+    .subsection-header:hover {
+      background: var(--hover-bg);
+    }
+
+    .subsection h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .subsection-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 3px;
+      border-radius: 2px;
+      transition: all 0.2s ease;
+      background: transparent;
+    }
+
+    .subsection-toggle:hover {
+      background: var(--hover-bg);
+    }
+
+    .subsection-toggle .chevron {
+      width: 14px; /* Légèrement plus petit que les sections */
+      height: 14px;
+      fill: var(--text-color);
+      transition: transform 0.2s ease;
+      opacity: 0.6;
+    }
+
+    .subsection-toggle:hover .chevron {
+      opacity: 0.9;
+    }
+
+    /* Rotation quand la subsection est fermée */
+    .subsection.collapsed .subsection-toggle .chevron {
+      transform: rotate(180deg);
+    }
+
+    .subsection-content {
+      padding: 12px;
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+
+    .subsection.collapsed .subsection-content {
+      display: none;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      padding: 20px;
+      margin: 0 auto;
+      max-width: 1200px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: var(--header-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    #theme-toggle {
+      background: var(--button-bg);
+      border: 1px solid var(--accent-blue);
+      border-radius: 3px;
+      width: 32px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      color: white;
+      transition: all 0.1s ease;
+    }
+
+    #theme-toggle:hover {
+      background: #1177bb;
+      transform: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    #theme-toggle:active {
+      background: #005a9e;
+      transform: scale(0.98);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      padding: 12px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-weight: 400;
+      transition: all 0.1s ease;
+      position: relative;
+      overflow: visible;
+      z-index: auto;
+      isolation: isolate;
+    }
+
+    .card:hover {
+      background: var(--hover-bg);
+      border-color: var(--accent-blue);
+      transform: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    .card img {
+      width: 24px;
+      height: 24px;
+      border-radius: 2px;
+      transition: none;
+    }
+
+    .tooltip {
+      position: fixed;
+      background: var(--activity-bar);
+      color: var(--text-color);
+      padding: 6px 8px; /* Augmentation du padding vertical */
+      border-radius: 3px;
+      font-size: 11px;
+      font-family: inherit; /* Utilise la même police que le parent */
+      line-height: 1.2; /* Line-height explicite */
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.1s ease, visibility 0.1s ease;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      z-index: 2147483647;
+      pointer-events: none;
+      /* Correction pour l'alignement du texte */
+      display: inline-block;
+      vertical-align: baseline;
+      box-sizing: border-box; /* Important pour le padding */
+    }
+
+
+    .card:hover .tooltip {
+      opacity: 1;
+      visibility: visible;
+      /* transform: translateX(-50%) translateY(-2px); */
+    }
+
+    /* Animation de transition - correction complète */
+    .theme-transition-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1005;
+      background: transparent; /* Suppression du background qui masquait le cercle */
+    }
+
+    .theme-transition-circle {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0.95;
+      z-index: 1005;
+    }
+
+    .theme-transition-circle.light-to-dark {
+      background: radial-gradient(
+        circle, 
+        #1e1e1e 30%, 
+        rgba(30, 30, 30, 0.9) 50%, 
+        rgba(30, 30, 30, 0.7) 70%, 
+        rgba(30, 30, 30, 0.4) 85%, 
+        transparent 100%
+      );
+    }
+
+    .theme-transition-circle.dark-to-light {
+      background: radial-gradient(
+        circle, 
+        #ffffff 30%, 
+        rgba(255, 255, 255, 0.9) 50%, 
+        rgba(255, 255, 255, 0.7) 70%, 
+        rgba(255, 255, 255, 0.4) 85%, 
+        transparent 100%
+      );
+    }
+
+    .theme-transition-circle.animate {
+      transform: scale(3);
+    }
+
+    /* Scrollbar personnalisée style VSCode */
+    ::-webkit-scrollbar {
+      width: 14px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-color);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 7px;
+      border: 3px solid var(--bg-color);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 18px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+      }
+
+      body {
+        padding: 15px;
+        max-width: 100%;
+      }
+
+      .side-menu {
+        width: 280px;
+      }
+      
+      .burger-menu {
+        top: 8px;
+        left: 8px;
+        width: 35px;
+        height: 35px;
+      }
+
+      .back-to-top {
+        bottom: 15px;
+        right: 15px;
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+      }
+    }
+  </style>
+
+
+</head>
+<body>
+  <!-- Menu Burger -->
+  <div id="burger-menu" class="burger-menu">
+    <div class="burger-icon">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+
+  <!-- Bouton Back to Top -->
+  <button id="back-to-top" class="back-to-top" title="Retour en haut">
+    ↑
+  </button>
+
+  <!-- Menu latéral -->
+  <div id="menu-overlay" class="menu-overlay"></div>
+  <nav id="side-menu" class="side-menu">
+    <ul class="menu-nav">
+      <li><a href="#" data-section="langages">🚀 Langages de Programmation</a></li>
+      <li><a href="#" data-section="frameworks">⚡ Frameworks & Librairies</a></li>
+      <li><a href="#" data-section="outils">🔧 Outils de Développement</a></li>
+      <li><a href="#" data-section="databases">💾 Bases de Données</a></li>
+      <li><a href="#" data-section="ai">🤖 Intelligence Artificielle</a>
+        <ul class="submenu">
+          <li><a href="#" data-section="ai-text">💬 Modèles de Texte</a></li>
+          <li><a href="#" data-section="ai-images">🎨 Génération d'Images</a></li>
+          <li><a href="#" data-section="ai-reasoning">🧠 Raisonnement</a></li>
+          <li><a href="#" data-section="ai-media">🎵 Audio & Vidéo</a></li>
+          <li><a href="#" data-section="ai-opensource">⚡ Open Source</a></li>
+        </ul>
+      </li>
+    </ul>
+    <div class="menu-footer">
+    <div class="footer-line">© 2025 JuloDurden • v1.0</div>
+  </div>
+  </nav>
+
+  <!-- Overlay pour l'animation de transition -->
+  <div class="theme-transition-overlay">
+    <div class="theme-transition-circle"></div>
+  </div>
+
+  <div class="header">
+    <h1>🧰 Trousse à outils du dev</h1>
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">
+      <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+  </div>
+
+<div class="section" id="langages">
+  <div class="section-header">
+    <h2>💻 Langages Informatiques</h2>
+    <span class="section-toggle">
+    <svg class="chevron" viewBox="0 0 16 16">
+      <path d="M12.5 5.5L8 10 3.5 5.5l1-1L8 7.5l3.5-3.5z"/>
+    </svg>
+  </span>
+  </div>
+  <div class="section-content">
+    <ul class="grid">
+      <li><a class="card" href="https://www.gnu.org/software/bash/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg">
+        Bash
+        <span class="tooltip">Shell de commande Unix/Linux</span>
+      </a></li>
+      <li><a class="card" href="https://en.cppreference.com/w/c" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg">
+        C
+        <span class="tooltip">Langage de programmation système</span>
+      </a></li>
+      <li><a class="card" href="https://isocpp.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg">
+        C++
+        <span class="tooltip">Extension orientée objet du langage C</span>
+      </a></li>
+      <li><a class="card" href="https://learn.microsoft.com/en-us/dotnet/csharp/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg">
+        C#
+        <span class="tooltip">Langage Microsoft pour .NET</span>
+      </a></li>
+      <li><a class="card" href="https://developer.mozilla.org/fr/docs/Web/CSS" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg">
+        CSS
+        <span class="tooltip">Feuilles de style pour le web</span>
+      </a></li>
+      <li><a class="card" href="https://developer.mozilla.org/fr/docs/Web/HTML" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg">
+        HTML
+        <span class="tooltip">Langage de balisage web</span>
+      </a></li>
+      <li><a class="card" href="https://www.java.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg">
+        Java
+        <span class="tooltip">Langage orienté objet multiplateforme</span>
+      </a></li>
+      <li><a class="card" href="https://developer.mozilla.org/fr/docs/Web/JavaScript" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg">
+        JavaScript
+        <span class="tooltip">Langage de script pour le web</span>
+      </a></li>
+      <li><a class="card" href="https://www.php.net/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg">
+        PHP
+        <span class="tooltip">Langage de script côté serveur</span>
+      </a></li>
+      <li><a class="card" href="https://www.python.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg">
+        Python
+        <span class="tooltip">Langage polyvalent et facile à apprendre</span>
+      </a></li>
+      <li><a class="card" href="https://www.ruby-lang.org/fr/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg">
+        Ruby
+        <span class="tooltip">Langage orienté objet élégant</span>
+      </a></li>
+      <li><a class="card" href="https://www.rust-lang.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rust/rust-plain.svg">
+        Rust
+        <span class="tooltip">Langage système sûr et performant</span>
+      </a></li>
+      <li><a class="card" href="https://go.dev/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg">
+        Go
+        <span class="tooltip">Langage Google simple et efficace</span>
+      </a></li>
+      <li><a class="card" href="https://developer.apple.com/swift/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg">
+        Swift
+        <span class="tooltip">Langage Apple pour iOS/macOS</span>
+      </a></li>
+      <li><a class="card" href="https://www.typescriptlang.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg">
+        TypeScript
+        <span class="tooltip">JavaScript avec typage statique</span>
+      </a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="section" id="frameworks-frontend">
+  <div class="section-header">
+    <h2>🎨 Frameworks Frontend</h2>
+    <span class="section-toggle">
+    <svg class="chevron" viewBox="0 0 16 16">
+      <path d="M12.5 5.5L8 10 3.5 5.5l1-1L8 7.5l3.5-3.5z"/>
+    </svg>
+  </span>
+  </div>
+  <div class="section-content">
+    <ul class="grid">
+      <li><a class="card" href="https://angular.io/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/angularjs/angularjs-original.svg">
+        Angular
+        <span class="tooltip">Framework TypeScript robuste de Google</span>
+      </a></li>
+      <li><a class="card" href="https://backbonejs.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/backbonejs/backbonejs-original.svg">
+        Backbone.js
+        <span class="tooltip">Framework MV* léger</span>
+      </a></li>
+      <li><a class="card" href="https://getbootstrap.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg">
+        Bootstrap
+        <span class="tooltip">Framework CSS responsive</span>
+      </a></li>
+      <li><a class="card" href="https://emberjs.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ember/ember-original-wordmark.svg">
+        Ember.js
+        <span class="tooltip">Framework ambitieux pour applications web</span>
+      </a></li>
+      <li><a class="card" href="https://www.gatsbyjs.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gatsby/gatsby-original.svg">
+        Gatsby
+        <span class="tooltip">Générateur de sites statiques React</span>
+      </a></li>
+      <li><a class="card" href="https://jquery.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jquery/jquery-original.svg">
+        jQuery
+        <span class="tooltip">Bibliothèque JavaScript simplifiée</span>
+      </a></li>
+      <li><a class="card" href="https://mui.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/materialui/materialui-original.svg">
+        Material UI
+        <span class="tooltip">Composants React Material Design</span>
+      </a></li>
+      <li><a class="card" href="https://nextjs.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg">
+        Next.js
+        <span class="tooltip">Framework React full-stack</span>
+      </a></li>
+      <li><a class="card" href="https://nuxt.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nuxtjs/nuxtjs-original.svg">
+        Nuxt
+        <span class="tooltip">Framework Vue.js universel</span>
+      </a></li>
+      <li><a class="card" href="https://react.dev/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg">
+        React
+        <span class="tooltip">Bibliothèque UI composants Facebook</span>
+      </a></li>
+      <li><a class="card" href="https://redux.js.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redux/redux-original.svg">
+        Redux
+        <span class="tooltip">Gestionnaire d'état prévisible</span>
+      </a></li>
+      <li><a class="card" href="https://svelte.dev/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/svelte/svelte-original.svg">
+        Svelte
+        <span class="tooltip">Framework compilé innovant</span>
+      </a></li>
+      <li><a class="card" href="https://tailwindcss.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-plain.svg">
+        Tailwind CSS
+        <span class="tooltip">Framework CSS utility-first</span>
+      </a></li>
+      <li><a class="card" href="https://vitejs.dev/" target="_blank">
+        <img src="https://vitejs.dev/logo.svg">
+        Vite
+        <span class="tooltip">Build tool ultra-rapide</span>
+      </a></li>
+      <li><a class="card" href="https://vuejs.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg">
+        Vue.js
+        <span class="tooltip">Framework progressif intuitif</span>
+      </a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="section" id="frameworks-backend">
+  <div class="section-header">
+    <h2>⚙️ Frameworks Backend</h2>
+    <span class="section-toggle">
+    <svg class="chevron" viewBox="0 0 16 16">
+      <path d="M12.5 5.5L8 10 3.5 5.5l1-1L8 7.5l3.5-3.5z"/>
+    </svg>
+  </span>
+  </div>
+  <div class="section-content">
+    <ul class="grid">
+      <li><a class="card" href="https://actix.rs/" target="_blank">
+        <img src="https://actix.rs/img/logo.png">
+        Actix
+        <span class="tooltip">Framework web Rust performant</span>
+      </a></li>
+      <li><a class="card" href="https://dotnet.microsoft.com/en-us/apps/aspnet" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dot-net/dot-net-original.svg">
+        ASP.NET
+        <span class="tooltip">Framework web Microsoft</span>
+      </a></li>
+      <li><a class="card" href="https://cakephp.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cakephp/cakephp-original.svg">
+        CakePHP
+        <span class="tooltip">Framework PHP convention over configuration</span>
+      </a></li>
+      <li><a class="card" href="https://www.djangoproject.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-plain.svg">
+        Django
+        <span class="tooltip">Framework Python batteries incluses</span>
+      </a></li>
+      <li><a class="card" href="https://expressjs.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg">
+        Express
+        <span class="tooltip">Framework Node.js minimaliste</span>
+      </a></li>
+      <li><a class="card" href="https://flask.palletsprojects.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flask/flask-original.svg">
+        Flask
+        <span class="tooltip">Micro-framework Python flexible</span>
+      </a></li>
+      <li><a class="card" href="https://gofiber.io/" target="_blank">
+        <img src="https://gofiber.io/assets/images/logo.svg">
+        Fiber
+        <span class="tooltip">Framework Go inspiré d'Express</span>
+      </a></li>
+      <li><a class="card" href="https://hapi.dev/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/hapi/hapi-original.svg">
+        Hapi.js
+        <span class="tooltip">Framework Node.js riche en fonctionnalités</span>
+      </a></li>
+      <li><a class="card" href="https://ktor.io/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kotlin/kotlin-original.svg">
+        Ktor
+        <span class="tooltip">Framework Kotlin asynchrone</span>
+      </a></li>
+      <li><a class="card" href="https://laravel.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-plain.svg">
+        Laravel
+        <span class="tooltip">Framework PHP élégant</span>
+      </a></li>
+      <li><a class="card" href="https://nestjs.com/" target="_blank">
+        <img src="https://nestjs.com/img/logo-small.svg">
+        NestJS
+        <span class="tooltip">Framework Node.js évolutif</span>
+      </a></li>
+      <li><a class="card" href="https://nodejs.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg">
+        Node.js
+        <span class="tooltip">Runtime JavaScript côté serveur</span>
+      </a></li>
+      <li><a class="card" href="https://rubyonrails.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rails/rails-original-wordmark.svg">
+        Ruby on Rails
+        <span class="tooltip">Framework Ruby convention over configuration</span>
+      </a></li>
+      <li><a class="card" href="https://spring.io/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg">
+        Spring
+        <span class="tooltip">Framework Java enterprise</span>
+      </a></li>
+      <li><a class="card" href="https://symfony.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/symfony/symfony-original.svg">
+        Symfony
+        <span class="tooltip">Framework PHP modulaire</span>
+      </a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="section" id="outils">
+  <div class="section-header">
+    <h2>🔧 Outils de Développement</h2>
+    <span class="section-toggle">
+    <svg class="chevron" viewBox="0 0 16 16">
+      <path d="M12.5 5.5L8 10 3.5 5.5l1-1L8 7.5l3.5-3.5z"/>
+    </svg>
+  </span>
+  </div>
+  <div class="section-content">
+    <ul class="grid">
+      <li><a class="card" href="https://babeljs.io/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/babel/babel-original.svg">
+        Babel
+        <span class="tooltip">Compilateur JavaScript</span>
+      </a></li>
+      <li><a class="card" href="https://www.docker.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg">
+        Docker
+        <span class="tooltip">Plateforme de conteneurisation</span>
+      </a></li>
+      <li><a class="card" href="https://eslint.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/eslint/eslint-original.svg">
+        ESLint
+        <span class="tooltip">Linter JavaScript</span>
+      </a></li>
+      <li><a class="card" href="https://firebase.google.com/" target="_blank">
+        <img src="https://firebase.google.com/downloads/brand-guidelines/PNG/logo-vertical.png">
+        Firebase
+        <span class="tooltip">Plateforme de développement Google</span>
+      </a></li>
+      <li><a class="card" href="https://git-scm.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg">
+        Git
+        <span class="tooltip">Système de contrôle de version</span>
+      </a></li>
+      <li><a class="card" href="https://github.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg">
+        GitHub
+        <span class="tooltip">Plateforme d'hébergement Git</span>
+      </a></li>
+      <li><a class="card" href="https://insomnia.rest/" target="_blank">
+        <img src="https://insomnia.rest/images/insomnia-logo.svg">
+        Insomnia
+        <span class="tooltip">Client REST API</span>
+      </a></li>
+      <li><a class="card" href="https://kubernetes.io/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg">
+        Kubernetes
+        <span class="tooltip">Orchestrateur de conteneurs</span>
+      </a></li>
+      <li><a class="card" href="https://www.npmjs.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/npm/npm-original-wordmark.svg">
+        npm
+        <span class="tooltip">Gestionnaire de paquets Node.js</span>
+      </a></li>
+      <li><a class="card" href="https://pnpm.io/" target="_blank">
+        <img src="https://avatars.githubusercontent.com/u/49699333?s=200&v=4">
+        pnpm
+        <span class="tooltip">Gestionnaire de paquets performant</span>
+      </a></li>
+      <li><a class="card" href="https://www.postman.com/" target="_blank">
+        <img src="https://www.postman.com/assets/logos/postman-logo-stacked.svg">
+        Postman
+        <span class="tooltip">Outil de test d'API</span>
+      </a></li>
+      <li><a class="card" href="https://prettier.io/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prettier/prettier-original.svg">
+        Prettier
+        <span class="tooltip">Formateur de code automatique</span>
+      </a></li>
+      <li><a class="card" href="https://code.visualstudio.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg">
+        VS Code
+        <span class="tooltip">Éditeur de code Microsoft</span>
+      </a></li>
+      <li><a class="card" href="https://webpack.js.org/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/webpack/webpack-original.svg">
+        Webpack
+        <span class="tooltip">Bundler de modules JavaScript</span>
+      </a></li>
+      <li><a class="card" href="https://yarnpkg.com/" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/yarn/yarn-original.svg">
+        Yarn
+        <span class="tooltip">Gestionnaire de paquets JavaScript</span>
+      </a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="section" id="ai">
+  <div class="section-header">
+    <h2>🤖 Intelligence Artificielle</h2>
+    <span class="section-toggle">
+    <svg class="chevron" viewBox="0 0 16 16">
+      <path d="M12.5 5.5L8 10 3.5 5.5l1-1L8 7.5l3.5-3.5z"/>
+    </svg>
+  </span>
+  </div>
+  <div class="section-content">
+    
+    <div class="subsection" id="ai-text">
+      <div class="subsection-header">
+        <h3>💬 Modèles de Texte & Conversation</h3>
+        <span class="subsection-toggle">
+    <svg class="chevron" viewBox="0 0 16 16">
+      <path d="M12.5 5.5L8 10 3.5 5.5l1-1L8 7.5l3.5-3.5z"/>
+    </svg>
+  </span>
+      </div>
+      <div class="subsection-content">
+        <ul class="grid">
+          <li><a class="card" href="https://chat.openai.com/" target="_blank">
+            <img src="https://cdn.oaistatic.com/_next/static/media/apple-touch-icon.59f2e898.png">
+            ChatGPT
+            <span class="tooltip">Assistant conversationnel OpenAI</span>
+          </a></li>
+          <li><a class="card" href="https://claude.ai/" target="_blank">
+            <img src="https://claude.ai/images/claude_app_icon.png">
+            Claude
+            <span class="tooltip">Assistant IA d'Anthropic</span>
+          </a></li>
+          <li><a class="card" href="https://gemini.google.com/" target="_blank">
+            <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg">
+            Gemini
+            <span class="tooltip">Modèle multimodal de Google</span>
+          </a></li>
+          <li><a class="card" href="https://perplexity.ai/" target="_blank">
+            <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/perplexity-ai-icon.png">
+            Perplexity
+            <span class="tooltip">Moteur de recherche IA</span>
+          </a></li>
+          <li><a class="card" href="https://you.com/" target="_blank">
+            <img src="https://you.com/favicon.ico">
+            You.com
+            <span class="tooltip">Moteur de recherche IA personnalisé</span>
+          </a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="subsection" id="ai-images">
+      <div class="subsection-header">
+        <h3>🎨 Génération d'Images</h3>
+        <span class="subsection-toggle">
+    <svg class="chevron" viewBox="0 0 16 16">
+      <path d="M12.5 5.5L8 10 3.5 5.5l1-1L8 7.5l3.5-3.5z"/>
+    </svg>
+  </span>
+      </div>
+      <div class="subsection-content">
+        <ul class="grid">
+          <li><a class="card" href="https://openai.com/dall-e-3" target="_blank">
+            <img src="https://cdn.oaistatic.com/_next/static/media/apple-touch-icon.59f2e898.png">
+            DALL-E 3
+            <span class="tooltip">Génération d'images OpenAI</span>
+          </a></li>
+          <li><a class="card" href="https://www.midjourney.com/" target="_blank">
+            <img src="https://seeklogo.com/images/M/midjourney-logo-F65A99D33E-seeklogo.com.png">
+            Midjourney
+            <span class="tooltip">Génération d'images artistiques</span>
+          </a></li>
+          <li><a class="card" href="https://stability.ai/" target="_blank">
+            <img src="https://images.squarespace-cdn.com/content/v1/6213c340453c3f502425776e/5e4b8d1a-28c8-4b8e-8004-c88ff9b51a39/stability+logo.png">
+            Stable Diffusion
+            <span class="tooltip">Modèle de diffusion open source</span>
+          </a></li>
+          <li><a class="card" href="https://firefly.adobe.com/" target="_blank">
+            <img src="https://www.adobe.com/content/dam/cc/icons/firefly.svg">
+            Adobe Firefly
+            <span class="tooltip">IA générative d'Adobe</span>
+          </a></li>
+          <li><a class="card" href="https://ideogram.ai/" target="_blank">
+            <img src="https://ideogram.ai/assets/progressive-image/balanced?url=https%3A%2F%2Fimg.ideogram.ai%2Fassets%2Fimage%2Flossless%2Fresponse%2F1Qz8XhQXQ7aLV2wQv9PTZA">
+            Ideogram
+            <span class="tooltip">Génération d'images avec texte</span>
+          </a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="subsection" id="ai-reasoning">
+      <div class="subsection-header">
+        <h3>🧠 Modèles de Raisonnement</h3>
+        <span class="subsection-toggle">
+    <svg class="chevron" viewBox="0 0 16 16">
+      <path d="M12.5 5.5L8 10 3.5 5.5l1-1L8 7.5l3.5-3.5z"/>
+    </svg>
+  </span>
+      </div>
+      <div class="subsection-content">
+        <ul class="grid">
+          <li><a class="card" href="https://chatgpt.com/o1" target="_blank">
+            <img src="https://cdn.oaistatic.com/_next/static/media/apple-touch-icon.59f2e898.png">
+            GPT-o1
+            <span class="tooltip">Modèle de raisonnement OpenAI</span>
+          </a></li>
+          <li><a class="card" href="https://www.anthropic.com/" target="_blank">
+            <img src="https://claude.ai/images/claude_app_icon.png">
+            Claude Sonnet
+            <span class="tooltip">Modèle de raisonnement avancé</span>
+          </a></li>
+          <li><a class="card" href="https://www.wolfram.com/language/" target="_blank">
+            <img src="https://company.wolfram.com/data/uploads/2020/04/wolfram-logo.png">
+            Wolfram Alpha
+            <span class="tooltip">Moteur de calculs avancés</span>
+          </a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="subsection" id="ai-media">
+      <div class="subsection-header">
+        <h3>🎵 Génération Audio & Vidéo</h3>
+        <span class="subsection-toggle">
+    <svg class="chevron" viewBox="0 0 16 16">
+      <path d="M12.5 5.5L8 10 3.5 5.5l1-1L8 7.5l3.5-3.5z"/>
+    </svg>
+  </span>
+      </div>
+      <div class="subsection-content">
+        <ul class="grid">
+          <li><a class="card" href="https://elevenlabs.io/" target="_blank">
+            <img src="https://elevenlabs.io/favicon.ico">
+            ElevenLabs
+            <span class="tooltip">Synthèse vocale IA</span>
+          </a></li>
+          <li><a class="card" href="https://openai.com/sora" target="_blank">
+            <img src="https://cdn.oaistatic.com/_next/static/media/apple-touch-icon.59f2e898.png">
+            Sora
+            <span class="tooltip">Génération de vidéos OpenAI</span>
+          </a></li>
+          <li><a class="card" href="https://runwayml.com/" target="_blank">
+            <img src="https://runwayml.com/favicon.ico">
+            Runway
+            <span class="tooltip">Suite créative IA pour vidéos</span>
+          </a></li>
+          <li><a class="card" href="https://www.udio.com/" target="_blank">
+            <img src="https://www.udio.com/favicon.ico">
+            Udio
+            <span class="tooltip">Génération musicale IA</span>
+          </a></li>
+          <li><a class="card" href="https://suno.ai/" target="_blank">
+            <img src="https://suno.ai/favicon.ico">
+            Suno
+            <span class="tooltip">Création musicale avec paroles</span>
+          </a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="subsection" id="ai-opensource">
+      <div class="subsection-header">
+        <h3>⚡ Modèles Open Source</h3>
+        <span class="subsection-toggle">
+    <svg class="chevron" viewBox="0 0 16 16">
+      <path d="M12.5 5.5L8 10 3.5 5.5l1-1L8 7.5l3.5-3.5z"/>
+    </svg>
+  </span>
+      </div>
+      <div class="subsection-content">
+        <ul class="grid">
+          <li><a class="card" href="https://huggingface.co/" target="_blank">
+            <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg">
+            Hugging Face
+            <span class="tooltip">Plateforme de modèles IA</span>
+          </a></li>
+          <li><a class="card" href="https://ollama.ai/" target="_blank">
+            <img src="https://ollama.ai/public/icon-192x192.png">
+            Ollama
+            <span class="tooltip">Exécution locale de LLMs</span>
+          </a></li>
+          <li><a class="card" href="https://github.com/meta-llama/llama" target="_blank">
+            <img src="https://github.com/meta-llama.png">
+            Llama
+            <span class="tooltip">Modèles open source Meta</span>
+          </a></li>
+          <li><a class="card" href="https://mistral.ai/" target="_blank">
+            <img src="https://mistral.ai/images/logo_hubc88c4ece131b91c7cb753f40e9e1cc5_2589_256x0_resize_q90_h2_lanczos_3.webp">
+            Mistral AI
+            <span class="tooltip">Modèles français open source</span>
+          </a></li>
+        </ul>
+      </div>
+    </div>
+
+  <script>
+    // Script de changement de thème corrigé
+    function toggleTheme(event) {
+      const body = document.body;
+      const currentTheme = body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      const themeIcon = document.getElementById('theme-icon');
+      
+      // Position du clic pour l'animation
+      const rect = event.target.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      
+      // Créer l'overlay d'animation
+      const overlay = document.createElement('div');
+      overlay.className = 'theme-transition-overlay';
+      
+      const circle = document.createElement('div');
+      circle.className = `theme-transition-circle ${currentTheme === 'light' ? 'light-to-dark' : 'dark-to-light'}`;
+      circle.style.left = x + 'px';
+      circle.style.top = y + 'px';
+      circle.style.width = '20px';
+      circle.style.height = '20px';
+      circle.style.marginLeft = '-10px';
+      circle.style.marginTop = '-10px';
+      
+      overlay.appendChild(circle);
+      document.body.appendChild(overlay);
+      
+      // Animer le cercle
+      setTimeout(() => {
+        const maxSize = Math.max(window.innerWidth, window.innerHeight) * 2.5;
+        circle.style.width = maxSize + 'px';
+        circle.style.height = maxSize + 'px';
+        circle.style.marginLeft = (-maxSize / 2) + 'px';
+        circle.style.marginTop = (-maxSize / 2) + 'px';
+        circle.classList.add('animate');
+      }, 10);
+      
+      // Changer le thème à mi-parcours de l'animation
+      setTimeout(() => {
+        body.setAttribute('data-theme', newTheme);
+        
+        // Changer l'icône
+        if (newTheme === 'light') {
+          themeIcon.className = 'fas fa-moon';
+        } else {
+          themeIcon.className = 'fas fa-sun';
+        }
+        
+        // Sauvegarder le thème
+        localStorage.setItem('theme', newTheme);
+      }, 450);
+      
+      // Nettoyer l'overlay
+      setTimeout(() => {
+        overlay.remove();
+      }, 1000);
+    }
+
+    // Attacher l'événement au bouton de thème
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+    // Charger le thème sauvegardé - CORRIGÉ
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('theme');
+      const themeIcon = document.getElementById('theme-icon');
+      const body = document.body;
+      
+      // Si pas de thème sauvé, utiliser le thème sombre par défaut
+      const initialTheme = savedTheme || 'dark';
+      
+      body.setAttribute('data-theme', initialTheme);
+      
+      // Définir l'icône correcte
+      if (initialTheme === 'light') {
+        themeIcon.className = 'fas fa-moon'; // Lune en mode clair
+      } else {
+        themeIcon.className = 'fas fa-sun';  // Soleil en mode sombre
+      }
+      
+      // Sauvegarder si pas déjà fait
+      if (!savedTheme) {
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+
+    // Gestion du menu burger
+    document.addEventListener('DOMContentLoaded', function() {
+      const burgerMenu = document.getElementById('burger-menu');
+      const sideMenu = document.getElementById('side-menu');
+      const menuOverlay = document.getElementById('menu-overlay');
+
+      function toggleMenu() {
+        sideMenu.classList.toggle('open');
+        menuOverlay.classList.toggle('open');
+      }
+
+      burgerMenu.addEventListener('click', toggleMenu);
+      menuOverlay.addEventListener('click', toggleMenu);
+
+      // Navigation fluide
+      document.querySelectorAll('.menu-nav a[data-section]').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('data-section');
+          const targetElement = document.getElementById(targetId);
+          
+          if (targetElement) {
+            // Fermer le menu
+            toggleMenu();
+            
+            // Déplier la section si elle est repliée
+            const section = targetElement.closest('.section');
+            if (section && section.classList.contains('collapsed')) {
+              section.classList.remove('collapsed');
+            }
+            
+            // Scroll fluide
+            setTimeout(() => {
+              targetElement.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }, 300);
+          }
+        });
+      });
+
+      // Gestion des sections collapsibles
+      document.querySelectorAll('.section-header').forEach(header => {
+        header.addEventListener('click', function() {
+          const section = this.closest('.section');
+          section.classList.toggle('collapsed');
+        });
+      });
+
+      // Gestion des sous-sections collapsibles
+      document.querySelectorAll('.subsection-header').forEach(header => {
+        header.addEventListener('click', function() {
+          const subsection = this.closest('.subsection');
+          subsection.classList.toggle('collapsed');
+        });
+      });
+    });
+
+    // Gestion du bouton Back to Top
+    const backToTopButton = document.getElementById('back-to-top');
+
+    // Afficher/masquer le bouton selon le scroll
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        backToTopButton.classList.add('visible');
+      } else {
+        backToTopButton.classList.remove('visible');
+      }
+    });
+
+    // Action du bouton - scroll smooth vers le haut
+    backToTopButton.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const cards = document.querySelectorAll('.card');
+      
+      cards.forEach(card => {
+        const tooltip = card.querySelector('.tooltip');
+        if (!tooltip) return;
+        
+        card.addEventListener('mouseenter', function() {
+          const rect = card.getBoundingClientRect();
+          tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+          tooltip.style.top = (rect.top - 40) + 'px';
+          tooltip.style.transform = 'translateX(-50%)';
+        });
+      });
+    });
+
+  </script>
+</body>
+</html>
